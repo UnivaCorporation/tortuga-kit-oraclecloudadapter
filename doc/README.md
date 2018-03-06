@@ -88,7 +88,7 @@ You'll then be redirected to the instance overview.  Once the instance has been 
 Copy the prerequisites packages onto the installer node, into `opc`'s home directory.
 
 ```
-scp Tortuga-*.tar.bz2 opc@${INSTANCE_PUBLIC_IP}:~/
+scp tortuga-*.tar.bz2 opc@${INSTANCE_PUBLIC_IP}:~/
 scp kit-oraclecloudadapter-*.tar.bz2 opc@${INSTANCE_PUBLIC_IP}:~/
 scp kit-uge-*.tar.bz2 opc@${INSTANCE_PUBLIC_IP}:~/
 ```
@@ -126,23 +126,23 @@ Open the following firewall ports.
 | 61614 | tcp |ActiveMQ (req'd by MCollective (installer) |
 
 ```
-firewall-cmd --permanent --zone=public --add-port=[port]/{udp,tcp} 
+firewall-cmd --permanent --zone=public --add-port=[port]/{udp,tcp}
 ```
 
 Unpack the Tortuga package.
 
 ```
 cd ~opc
-tar -xjf Tortuga-*.tar.bz2
-cd Tortuga-*
+tar -xjf tortuga-*.tar.bz2
+cd tortuga-*
 ```
 
 Run the installer
 
 ```
-./install-Tortuga.sh
-/opt/Tortuga/bin/Tortuga-setup --defaults
-source /opt/Tortuga/etc/Tortuga.sh
+./install-tortuga.sh
+/opt/tortuga/bin/tortuga-setup --defaults
+source /opt/tortuga/etc/tortuga.sh
 ```
 
 ### Upload Installer PEM key

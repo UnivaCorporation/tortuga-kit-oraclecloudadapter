@@ -1,1 +1,1 @@
-simple-policy
+tortuga-oraclecloud-adapter

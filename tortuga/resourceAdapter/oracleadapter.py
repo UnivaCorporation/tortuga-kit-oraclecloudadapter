@@ -420,6 +420,7 @@ class Oracleadapter(ResourceAdapter):
 
         # Generate node name
         hostname, _ = self.addHostApi.generate_node_name(
+            node_spec['db_session'],
             node_spec['db_hardware_profile'].nameFormat,
             dns_zone=self.private_dns_zone).split('.', 1)
 
