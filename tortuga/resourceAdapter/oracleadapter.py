@@ -755,10 +755,10 @@ fqdn: %s
                 'attachment; filename="%s"' % filename)
             combined_message.attach(sub_message)
 
-            return str(b64encode(combined_message))
+            return b64encode(combined_message.encode()).decode()
 
         # Fallback to default behaviour
-        return b64encode(result)
+        return b64encode(result.encode()).decode()
 
     def deleteNode(self, dbNodes):
         """
