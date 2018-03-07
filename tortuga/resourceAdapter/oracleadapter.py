@@ -240,7 +240,6 @@ class Oracleadapter(ResourceAdapter):
 
         return configDict
 
-    @property
     @staticmethod
     def __cloud_instance_metadata():
         """
@@ -251,7 +250,6 @@ class Oracleadapter(ResourceAdapter):
         response = urlopen('http://169.254.169.254/opc/v1/instance/')
         return json.load(response)
 
-    @property
     @staticmethod
     def __cloud_vnic_metadata():
         """
@@ -269,12 +267,8 @@ class Oracleadapter(ResourceAdapter):
 
         :returns: Dictionary metadata
         """
-        compute = self.__cloud_instance_metadata
-        vnic = self.__cloud_vnic_metadata
-
-        full_compute = self.__client.get_instance(
-            compute['id']
-        ).data
+        compute = self.__cloud_instance_metadata()
+        vnic = self.__cloud_vnic_metadata()
 
         full_vnic = self.__net_client.get_vnic(
             vnic['vnicId']
@@ -755,7 +749,7 @@ fqdn: %s
                 'attachment; filename="%s"' % filename)
             combined_message.attach(sub_message)
 
-            return b64encode(combined_message.encode()).decode()
+            return b64encode(str(combined_message).encode()).deocde()
 
         # Fallback to default behaviour
         return b64encode(result.encode()).decode()
