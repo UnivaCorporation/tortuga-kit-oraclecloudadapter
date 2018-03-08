@@ -325,6 +325,8 @@ class Oracleadapter(ResourceAdapter):
             )
         )
 
+        self.addHostApi.clear_session_nodes(nodes)
+
         return nodes
 
     def __add_nodes(self, add_nodes_request, db_session, db_hardware_profile,
