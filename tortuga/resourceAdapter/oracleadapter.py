@@ -204,10 +204,7 @@ class Oracleadapter(ResourceAdapter):
                     ' '.join(missing_keys)
                 )
 
-            self.getLogger().error('[%s] %s' % (
-                self.__adaptername__,
-                error_message
-            ))
+            self.getLogger().error(error_message)
 
     def getResourceAdapterConfig(self, sectionName=None):
         """
@@ -293,9 +290,8 @@ class Oracleadapter(ResourceAdapter):
         :return: List Instance objects
         """
         self.getLogger().debug(
-            '[%s] start(): addNodesRequest=[%s], dbSession=[%s],'
+            'start(): addNodesRequest=[%s], dbSession=[%s],'
             ' dbHardwareProfile=[%s], dbSoftwareProfile=[%s]' % (
-                self.__adaptername__,
                 addNodesRequest,
                 dbSession,
                 dbHardwareProfile,
@@ -313,18 +309,16 @@ class Oracleadapter(ResourceAdapter):
 
         if len(nodes) < addNodesRequest['count']:
             self.getLogger().warning(
-                '[%s] %s node(s) requested, only %s launched'
+                '%s node(s) requested, only %s launched'
                 ' successfully' % (
-                    self.__adaptername__,
                     addNodesRequest['count'],
                     len(nodes)
                 )
             )
 
         self.getLogger().debug(
-            '[%s] start() session [%s] completed in'
+            'start() session [%s] completed in'
             ' %0.2f seconds' % (
-                self.__adaptername__,
                 self.addHostSession,
                 stop_watch.result.seconds +
                 stop_watch.result.microseconds / 1000000.0
@@ -390,8 +384,8 @@ class Oracleadapter(ResourceAdapter):
                 node_spec['db_session'].commit()
 
             self.getLogger().error(
-                '[%s] Error launching instance: [%s]' % (
-                    self.__adaptername__, exc)
+                'Error launching instance: [%s]' % (
+                    exc)
             )
 
             return
@@ -473,8 +467,7 @@ class Oracleadapter(ResourceAdapter):
             session.config['vcpus'] else \
             session.cores_from_shape
         self.getLogger().debug(
-            '[%s] setting vcpus to %d' % (
-                self.__adaptername__,
+            'setting vcpus to %d' % (
                 self.__vcpus
             )
         )
@@ -483,8 +476,8 @@ class Oracleadapter(ResourceAdapter):
             node = node_dict['node']
 
             self.getLogger().debug(
-                '[%s] overriding instance name [%s]' % (
-                    self.__adaptername__, node.name)
+                'overriding instance name [%s]' % (
+                    node.name)
             )
 
             launch_config.display_name = node.name
@@ -536,9 +529,9 @@ class Oracleadapter(ResourceAdapter):
         :return: Nodes object
         """
         self.getLogger().debug(
-            '[%s] Instance post-launch action for'
-            ' instance [%s]' % (
-                self.__adaptername__, instance.id))
+            'Instance post-launch action for instance [%s]' % (
+                instance.id)
+        )
 
         if 'node' not in node_dict:
             domain = self.installer_public_hostname.split('.')[1:]
@@ -588,8 +581,8 @@ class Oracleadapter(ResourceAdapter):
             ip)
 
         self.getLogger().debug(
-            '[%s] _instance_post_launch(): node=[%s]' % (
-                self.__adaptername__, node)
+            '_instance_post_launch(): node=[%s]' % (
+                node)
         )
 
         return node
@@ -708,8 +701,7 @@ dns_nameservers = %(dns_nameservers)s
         :return: String
         """
         self.getLogger().info(
-            '[%s] Using cloud-init script template [%s]' % (
-                self.__adaptername__,
+            'Using cloud-init script template [%s]' % (
                 config['user_data_script_template']))
 
         settings_dict = self.__get_common_user_data_settings(config, node)
@@ -763,8 +755,9 @@ fqdn: %s
         """
         self._async_delete_nodes(dbNodes)
 
-        self.getLogger().info('[%s] %d node(s) deleted' % (
-            self.__adaptername__, len(dbNodes))
+        self.getLogger().info(
+            '%d node(s) deleted' % (
+                len(dbNodes))
         )
 
     def _wait_for_instance_state(self, instance_ocid, state, callback=None,
@@ -853,7 +846,6 @@ fqdn: %s
 
 class CustomAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
-        return '[%s] Instance OCID [...%s]: %s' % (
-            Oracleadapter.__adaptername__,
+        return 'Instance OCID [...%s]: %s' % (
             self.extra['instance_ocid'][-6:], msg), kwargs
 
