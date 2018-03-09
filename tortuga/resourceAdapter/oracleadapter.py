@@ -382,7 +382,6 @@ class Oracleadapter(ResourceAdapter):
         except Exception as exc:
             if 'node' in node_dict:
                 node_spec['db_session'].delete(node_dict['node'])
-
                 node_spec['db_session'].commit()
 
             self.getLogger().error(

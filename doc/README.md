@@ -165,30 +165,6 @@ To allow Tortuga to set the hostnames of added compute nodes, we need to enable 
 enable-component -p dns
 ```
 
-### Create Software Profile
-
-This software profile will be used to represent compute nodes in the cluster. The software profile name can be arbitrary.
-
-```
-create-software-profile --name execd --no-os-media-required
-```
-
-### Create Hardware Profile
-
-This hardware profile will used to represent compute nodes in the cluster. The hardware profile name is arbitrary.
-
-```
-create-hardware-profile --name execd
-```
-
-### Map the Software and Hardware Profile
-
-Profiles must be mapped in order for Tortuga to identify a valid compute node provisioning configuration.
-
-```
-set-profile-mapping --software-profile execd --hardware-profile execd
-```
-
 ### Install the Oracle Cloud Adapter
 
 We're now ready to install the OCI adapter via the kit.
@@ -222,18 +198,31 @@ adapter-mgmt create \
     --setting fingerprint=<API key fingerprint>
 ```
 
-### Create Hardware Profile for Compute Nodes
+### Create Software Profile
+
+This software profile will be used to represent compute nodes in the cluster. The software profile name can be arbitrary.
+
+```
+create-software-profile --name execd --no-os-media-required
+```
+
+### Create Hardware Profile
+
+This hardware profile will used to represent compute nodes in the cluster. The hardware profile name is arbitrary.
 
 ```
 create-hardware-profile --name execd-oci
 update-hardware-profile --name execd-oci --resource-adapter oraclecloud --location remote
 ```
 
-Then map this to the software profile.
+### Map the Software and Hardware Profile
+
+Profiles must be mapped in order for Tortuga to identify a valid compute node provisioning configuration.
 
 ```
 set-profile-mapping --software-profile execd --hardware-profile execd-oci
 ```
+
 
 ### Install UGE Kit
 
