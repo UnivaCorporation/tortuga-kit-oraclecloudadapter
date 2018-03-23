@@ -238,7 +238,7 @@ class Oracleadapter(ResourceAdapter):
         return configDict
 
     @staticmethod
-    def __cloud_instance_metadata():
+    def __cloud_instance_metadata() -> dict:
         """
         Get the cloud metadata.
 
@@ -248,7 +248,7 @@ class Oracleadapter(ResourceAdapter):
         return json.load(response)
 
     @staticmethod
-    def __cloud_vnic_metadata():
+    def __cloud_vnic_metadata() -> dict:
         """
         Get the VNIC cloud metadata.
 
@@ -258,7 +258,7 @@ class Oracleadapter(ResourceAdapter):
         return json.load(response)
 
     @property
-    def __cloud_launch_metadata(self):
+    def __cloud_launch_metadata(self) -> dict:
         """
         Get metadata needed to create metadata.
 
@@ -795,11 +795,11 @@ fqdn: %s
             # terminated instance? Exception?
             instance = self.__client.get_instance(instance_cache['id'])
 
-            logadapter = CustomAdapter(
+            log_adapter = CustomAdapter(
                 self.getLogger(), {'instance_ocid': instance_cache['id']})
 
             # Issue terminate request
-            logadapter.debug('Terminating...')
+            log_adapter.debug('Terminating...')
 
             self.__client.terminate_instance(instance.data.id)
 
