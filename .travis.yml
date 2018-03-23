@@ -1,0 +1,29 @@
+language: python
+python:
+- '3.6'
+services:
+- docker
+env:
+- TORTUGA_BUILD_DOCKER="true"
+before_install:
+- docker pull puppet/puppet-agent
+install:
+- pip install tox
+- git clone https://github.com/UnivaCorporation/tortuga.git tortuga-base
+- cd tortuga-base/
+- pip install -r requirements.txt
+- paver build
+- cd ../
+- build-kit
+script:
+- echo "Done"
+deploy:
+  provider: releases
+  api_key:
+    secure: SM+0R0p++sx3EQ0QD1haZd/WEX4yGccJeR/FW7AbCnwxdFw0loG2DzzIIV3n3LRpiF1fyFTdGPEWBqHSmcXV/knTSG1FGrnJvqsvfw5X2Qz/6hlttdRWtAT7Rhr6p41ytP3jTnh4OFkdHhMyGyYO88frvg6Cd3TyaUwoN6myWGrg30CU+QALE2C+vA6oUGX+Pu7HX5YFXVDGtvANksJMoRoem0MU0bg9of4xm6Mth0bREKYZk+ab7bjRrUbKXnEiqZbHSgl9+Mu/qCLQECjlj8lUu8ZiK9pE2pkpwWGJyzuRk6LMXDQYUoMqmXF2w0OGcSBcPAhOFzQri3ODnUvI+NGCpbnfxN3NtDMFMt5CxQzVj0aMTmV5Ty1LdDRxiAd/aMuZP9xppIaL8SnHWbF3BIqsm51Jj1RTK/uu9YiiXMcUXVWkXSQvklSxUBms2Dx6P+m3K6HcPOtYH3w92Ir+JHQbJldLkc8VUUNjLNwDomFrFpWZTRaMZBo4b7nZ5ksQRONw4RRDckFxfuON5vTtCWgGKPoqscDD67/b8BT2qm33gydMMkgNdRvwUmHTXpV6UMbzZoGNHrvCMV2Ju0U1cpq3xcjhNPdVL9AGXFsXzZdL3FPv3tRPyqS30etnq5qCpNNX9xli0diVp0oKoOmbIsqVJZ/y43d757EVTTnXEkU=
+  file_glob: true
+  file: "dist/kit-oraclecloudadapter*.tar.bz2"
+  skip_cleanup: true
+  on:
+    all_branches: true
+    tags: true
