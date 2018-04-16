@@ -12,26 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import itertools
-import oci
-import sys
 import json
-import gevent
 import logging
-from urllib.request import urlopen
+import os
+import sys
 from base64 import b64encode
-from tortuga.db.nics import Nics
-from tortuga.db.nodes import Nodes
-from email.mime.text import MIMEText
-from tortuga.os_utility import osUtility
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from urllib.request import urlopen
+
+import gevent
+
+import oci
 from tortuga.config.configManager import ConfigManager
-from tortuga.exceptions.resourceNotFound import ResourceNotFound
-from tortuga.resourceAdapter.resourceAdapter import ResourceAdapter
+from tortuga.db.models.nic import Nic
+from tortuga.db.models.node import Node
 from tortuga.exceptions.configurationError import ConfigurationError
-from tortuga.resourceAdapter.utility import StopWatch, \
-    get_random_sleep_time
+from tortuga.exceptions.resourceNotFound import ResourceNotFound
+from tortuga.os_utility import osUtility
+from tortuga.resourceAdapter.resourceAdapter import ResourceAdapter
+from tortuga.resourceAdapter.utility import StopWatch, get_random_sleep_time
 
 
 class OciSession(object):
@@ -436,7 +437,7 @@ class Oracleadapter(ResourceAdapter):
 
     def __initialize_node(self, name, db_hardware_profile,
                           db_software_profile):
-        node = Nodes(name=name)
+        node = Node(name=name)
         node.softwareprofile = db_software_profile
         node.hardwareprofile = db_hardware_profile
         node.isIdle = False
@@ -557,7 +558,7 @@ class Oracleadapter(ResourceAdapter):
         for ip in self.__get_instance_private_ips(
                 instance.id, instance.compartment_id):
             nics.append(
-                Nics(ip=ip, boot=True)
+                Nic(ip=ip, boot=True)
             )
         node.nics = nics
 
@@ -849,4 +850,3 @@ class CustomAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         return 'Instance OCID [...%s]: %s' % (
             self.extra['instance_ocid'][-6:], msg), kwargs
-
