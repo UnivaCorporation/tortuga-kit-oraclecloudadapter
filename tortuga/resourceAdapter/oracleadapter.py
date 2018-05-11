@@ -172,6 +172,11 @@ class Oracleadapter(ResourceAdapter):
         if override_config and isinstance(override_config, dict):
             config.update(override_config)
 
+        self._timeouts = {
+            'launch': override_config['launch_timeout'] if
+                'launch_timeout' in override_config else 300
+        }
+
         oci.config.validate_config(config)
         self.__vcpus = None
         self.__installer_ip = None
@@ -348,9 +353,9 @@ class Oracleadapter(ResourceAdapter):
             'configDict': self.getResourceAdapterConfig(),
         }
 
-        return self.__oci_add_nodes(
+        return [result for result in self.__oci_add_nodes(
             count=int(add_nodes_request['count']),
-            node_spec=node_spec)
+            node_spec=node_spec)]
 
     def __oci_add_nodes(self, count=1, node_spec=None):
         """
@@ -365,8 +370,9 @@ class Oracleadapter(ResourceAdapter):
         for _ in range(count):
             greenlets.append(gevent.spawn(self.__oci_add_node, node_spec))
 
-        return [result.value
-                for result in gevent.iwait(greenlets) if result.value]
+        for result in gevent.iwait(greenlets):
+            if result.value:
+                yield result.value
 
     def __oci_add_node(self, node_spec):
         """
@@ -375,25 +381,29 @@ class Oracleadapter(ResourceAdapter):
         :param node_spec: instance launch specification
         :return: Nodes object (or None, on failure)
         """
-        node_dict = self.__oci_pre_launch_instance(node_spec=node_spec)
+        with gevent.Timeout(self._timeouts['launch'], TimeoutError):
+            node_dict = self.__oci_pre_launch_instance(node_spec=node_spec)
 
-        try:
-            instance = self._launch_instance(node_dict=node_dict,
-                                             node_spec=node_spec)
-        except Exception as exc:
-            if 'node' in node_dict:
-                node_spec['db_session'].delete(node_dict['node'])
-                node_spec['db_session'].commit()
+            try:
+                instance = self._launch_instance(node_dict=node_dict,
+                                                 node_spec=node_spec)
+            except Exception as exc:
+                if 'node' in node_dict:
+                    self.__client.terminate_instance(
+                        node_dict['instance_ocid'])
+                    self._wait_for_instance_state(
+                        node_dict['instance_ocid'], 'TERMINATED')
+                    node_spec['db_session'].delete(node_dict['node'])
+                    node_spec['db_session'].commit()
 
-            self.getLogger().error(
-                'Error launching instance: [%s]' % (
-                    exc)
-            )
+                self.getLogger().error(
+                    'Error launching instance: [{}]'.format(exc)
+                )
 
-            return
+                return
 
-        return self._instance_post_launch(
-            instance, node_dict=node_dict, node_spec=node_spec)
+            return self._instance_post_launch(
+                instance, node_dict=node_dict, node_spec=node_spec)
 
     def __oci_pre_launch_instance(self, node_spec=None):
         """
