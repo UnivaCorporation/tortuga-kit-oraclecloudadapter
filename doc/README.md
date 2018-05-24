@@ -237,6 +237,7 @@ Configure the UGE cluster.
 ```
 uge-cluster create default
 uge-cluster update default --add-qmaster-swprofile Installer
+uge-cluster update default --add-execd-swprofile execd
 uge-cluster update default --var sge_cell_netpath="%(qmaster)s:%(sge_root)s/%(cell_name)s"
 uge-cluster update default --var manage_nfs=false
 ```
