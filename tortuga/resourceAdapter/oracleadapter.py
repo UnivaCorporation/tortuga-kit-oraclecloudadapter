@@ -597,6 +597,8 @@ class Oracleadapter(ResourceAdapter):
                 node)
         )
 
+        self.fire_provisioned_event(node)
+
         return node
 
     def __get_instance_public_ips(self, instance_id, compartment_id):
