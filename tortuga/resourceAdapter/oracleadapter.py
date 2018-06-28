@@ -30,6 +30,7 @@ from tortuga.db.models.nic import Nic
 from tortuga.db.models.node import Node
 from tortuga.exceptions.configurationError import ConfigurationError
 from tortuga.exceptions.resourceNotFound import ResourceNotFound
+from tortuga.node import state
 from tortuga.os_utility import osUtility
 from tortuga.resourceAdapter.resourceAdapter import ResourceAdapter
 from tortuga.resourceAdapter.utility import StopWatch, get_random_sleep_time
@@ -435,7 +436,7 @@ class Oracleadapter(ResourceAdapter):
             node_spec['db_software_profile']
         )
 
-        node.state = 'Launching'
+        node.state = state.NODE_STATE_LAUNCHING
 
         result['node'] = node
 
@@ -561,7 +562,7 @@ class Oracleadapter(ResourceAdapter):
         else:
             node = node_dict['node']
 
-        node.state = 'Provisioned'
+        node.state = state.NODE_STATE_PROVISIONED
 
         # Get ip address from instance
         nics = []
