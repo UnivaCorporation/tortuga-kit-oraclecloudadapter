@@ -25,15 +25,14 @@ from urllib.request import urlopen
 import gevent
 
 import oci
-from tortuga.config.configManager import ConfigManager
 from tortuga.db.models.nic import Nic
 from tortuga.db.models.node import Node
-from tortuga.exceptions.configurationError import ConfigurationError
 from tortuga.exceptions.resourceNotFound import ResourceNotFound
 from tortuga.node import state
 from tortuga.os_utility import osUtility
 from tortuga.resourceAdapter.resourceAdapter import ResourceAdapter
 from tortuga.resourceAdapter.utility import StopWatch, get_random_sleep_time
+from tortuga.resourceAdapterConfiguration import settings
 
 
 class OciSession(object):
@@ -41,7 +40,7 @@ class OciSession(object):
     Stores configuration for a session
     with OCI.
     """
-    def __init__(self, override_config=None):
+    def __init__(self, config: dict):
         """
         Set defaults, unless overridden.  Then
         set class attributes.
@@ -57,45 +56,12 @@ class OciSession(object):
         :return: OciSession instance
         """
         self.config = {
-            'availability_domain': None,
-            'compartment_id': None,
-            'shape': 'VM.Standard1.1',
-            'vcpus': None,
-            'subnet_id': None,
-            'image_id': None,
-            'user_data_script_template': os.path.join(
-                ConfigManager().getKitConfigBase(),
-                'oci_bootstrap.tmpl'),
-            'override_dns_domain': False,
-            'dns_options': None,
-            'dns_search': None,
-            'dns_nameservers': None,
             'metadata': {
                 'ssh_authorized_keys': self._get_ssh_key()
             }
         }
-
-        if override_config and isinstance(override_config, dict):
-            self.config.update(override_config)
-
-        if not self.config['vcpus']:
-            self.config['vcpus'] = self.cores_from_shape
-
-    def _validate_config(self):
-        """
-        Make sure all the needed keys are defined.
-        :return: None
-        """
-        required = [
-            'availability_domain',
-            'compartment_id',
-            'subnet_id',
-            'image_id'
-        ]
-
-        for key in required:
-            if not self.config[key]:
-                raise RuntimeError('%s is missing from config' % key)
+        self.config.update(config)
+        self.config['vcpus'] = self.config.get('vcpus', self.cores_from_shape)
 
     @property
     def launch_config(self):
@@ -149,6 +115,26 @@ class Oracleadapter(ResourceAdapter):
     Drive Oracle Cloud Infrastructure.
     """
     __adaptername__ = 'oraclecloud'
+
+    settings = {
+        'availability_domain': settings.StringSetting(required=True),
+        'compartment_id': settings.StringSetting(required=True),
+        'shape': settings.StringSetting(default='VM.Standard1.1'),
+        'vcpus': settings.IntegerSetting(),
+        'subnet_id': settings.StringSetting(required=True),
+        'image_id': settings.StringSetting(required=True),
+        'user_data_script_template': settings.FileSetting(
+            base_path='/tortuga/config/',
+            default='oci_bootstrap.tmpl'
+        ),
+        'override_dns_domain': settings.BooleanSetting(default='False'),
+        'dns_options': settings.StringSetting(),
+        'dns_search': settings.StringSetting(),
+        'dns_nameservers': settings.StringSetting(
+            list=True,
+            list_separator=' '
+        )
+    }
 
     def __init__(self, addHostSession=None):
         """
@@ -212,37 +198,6 @@ class Oracleadapter(ResourceAdapter):
                 )
 
             self.getLogger().error(error_message)
-
-    def getResourceAdapterConfig(self, sectionName=None):
-        """
-        Get resource adapter configuration dict
-
-        Raises:
-            ConfigurationError
-
-        :arg sectionName: resource adapter configuration profile name
-        :return: dict containing resource adapter configuration
-        :rtype: dict
-        """
-        configDict = super(Oracleadapter, self).getResourceAdapterConfig(
-            sectionName=sectionName)
-
-        if 'user_data_script_template' in configDict:
-            if not configDict['user_data_script_template'].startswith('/'):
-                fn = os.path.join(
-                    self._cm.getKitConfigBase(),
-                    configDict['user_data_script_template'])
-            else:
-                fn = configDict['user_data_script_template']
-
-            if not os.path.exists(fn):
-                raise ConfigurationError(
-                    'User data script template [%s] does not exist' % fn
-                )
-
-            configDict['user_data_script_template'] = fn
-
-        return configDict
 
     @staticmethod
     def __cloud_instance_metadata() -> dict:
